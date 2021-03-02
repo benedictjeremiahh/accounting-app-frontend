@@ -9,6 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Navbar from "components/Navbars/Navbar.js";
 import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
+import NotFound from "views/ErrorPages/NotFound";
 
 import routes from "routes.js";
 
@@ -33,7 +34,12 @@ const switchRoutes = (
 			}
 			return null;
 		})}
-		<Redirect from="/admin" to="/admin/dashboard" />
+		<Route
+			exact
+			path="/admin"
+			render={() => <Redirect to="/admin/dashboard" />}
+		/>
+		<Route component={NotFound} />
 	</Switch>
 );
 
@@ -76,7 +82,7 @@ export default function Admin({ ...rest }) {
 			window.removeEventListener("resize", resizeFunction);
 		};
 	}, [mainPanel]);
-  
+
 	return (
 		<div className={classes.wrapper}>
 			<Sidebar

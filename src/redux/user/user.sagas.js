@@ -19,7 +19,18 @@ export function* signInWithEmail({ payload }) {
 		const userData = result.data.data;
 		yield put(signInSuccess(userData));
 	} catch (error) {
-		yield put(signInFailure(error.message));
+		let message;
+		switch (error.response.status) {
+			case 403:
+				message = "Invalid Email / Username and Password";
+				break;
+			case 500:
+				message = error.response.data.message;
+				break;
+			default:
+				break;
+		}
+		yield put(signInFailure(message));
 	}
 }
 

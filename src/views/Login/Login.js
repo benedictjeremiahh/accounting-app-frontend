@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
@@ -13,6 +13,11 @@ import { useStyles } from "./Login.styles";
 import { useForm } from "react-hook-form";
 import { connect } from "react-redux";
 import { emailSignInStart } from "redux/user/user.action";
+import useSnackbar from "../../hooks/Snackbar.hook";
+import { selectUserError } from "redux/user/user.selector";
+import { createStructuredSelector } from "reselect";
+import { clearUserError } from "redux/user/user.action";
+import { selectUserLoading } from "redux/user/user.selector";
 
 function Copyright() {
 	return (
@@ -29,18 +34,43 @@ function Copyright() {
 
 const Login = (props) => {
 	const classes = useStyles();
+	const { userError, clearUserError, isLoading } = props;
+	const [timer, setTimer] = useState();
 	const { register, handleSubmit, errors } = useForm();
-	const loading = false;
+
+	const onCloseSnackbar = () => {
+		clearUserError();
+	};
+
+	const { snackbar, state, openSnackbar, closeSnackbar } = useSnackbar(
+		onCloseSnackbar
+	);
+
+	useEffect(() => {
+		if (!!userError) {
+			openSnackbar("tr", "danger", userError);
+			setTimer(
+				setTimeout(() => {
+					closeSnackbar(onCloseSnackbar);
+				}, 15000)
+			);
+		} else {
+			clearTimeout(timer);
+		}
+	}, [userError]);
 
 	const login = async (data) => {
-		const { emailSignInStart } = props;
-		emailSignInStart(data);
+		if (!isLoading) {
+			const { emailSignInStart } = props;
+			emailSignInStart(data);
+		}
 	};
 
 	return (
 		<Grid container component="main" className={classes.root}>
 			<CssBaseline />
 
+			{snackbar()}
 			<Grid item xs={false} sm={4} md={7} className={classes.image}>
 				<img
 					className={classes.backgroundImage}
@@ -111,7 +141,7 @@ const Login = (props) => {
 							color="primary"
 							className={classes.submit}
 						>
-							{loading ? (
+							{isLoading ? (
 								<CircularProgress color="inherit" />
 							) : (
 								"Sign In"
@@ -127,7 +157,13 @@ const Login = (props) => {
 	);
 };
 
+const mapStateToProps = createStructuredSelector({
+	userError: selectUserError,
+	isLoading: selectUserLoading,
+});
+
 const mapDispatchToProps = (dispatch) => ({
 	emailSignInStart: (credentials) => dispatch(emailSignInStart(credentials)),
+	clearUserError: (onClose) => dispatch(clearUserError(onClose)),
 });
-export default connect(null, mapDispatchToProps)(Login);
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

@@ -22,7 +22,12 @@ const App = (props) => {
 					props.currentUser ? <Redirect to="/admin" /> : <Login />
 				}
 			/>
-			<Route path="/admin" component={Admin} />
+			<Route
+				path="/admin"
+				render={() =>
+					props.currentUser ? <Admin /> : <Redirect to="/login" />
+				}
+			/>
 			<Redirect from="/" to="/admin/dashboard" />
 		</Switch>
 	);
